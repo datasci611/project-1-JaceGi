@@ -1,0 +1,61 @@
+---
+title: "611 Project 1"
+author: "Jace Gilbert"
+date: "September 18, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse,ggplot2)
+```
+# Dataset 1: `chickwts`
+
+```{r}
+chick<-tibble(weight = chickwts$weight, feed = chickwts$feed)
+chick %>% ggplot(aes(x=feed, y = weight, fill = feed)) + geom_boxplot() + geom_jitter(width=.1) + ylab("Chicks weight in grams")
+
+chick %>% group_by(feed) %>% summarise(mean =mean(weight))
+chick %>% group_by(feed) %>% summarise(sd = sd(weight))
+
+
+```
+The `chickwts` dataset in R consists of newly hatched chicks' weights (in grams) after six weeks of eating only a specific feed. The six feed types are casein, horsebean, linseed, meatmeal, soybean, sunflower. The chicks eating casein or sunflower had the greatest weights with a mean of 323.58 and 328.92 grams respectively. If we were running this experiment to determine the best type of feed to make our baby chickens gain the most weight, we could suggest feeding them sunflower or casein and at the very least recommend to avoid feeding them horsebean.
+It would be interesting to repeat this experiment by offering a mix of the different feed types and analyzing how each combination contributes to the chicks' weight gain.
+
+#Dataset 2: `CO2`
+
+In the `CO2` dataset we have different plants from two origins: Quebec and Mississippi and their recorded CO2 update rates at varying ambient carbon dioxide concentrations with two different treatments of chilled overnight and not chilled overnight.
+
+```{r}
+CO2 %>% ggplot(aes(y=uptake, x= Type, color = Type)) + geom_boxplot()
+
+
+CO2 %>% group_by(Treatment) %>% ggplot(aes(y=uptake, x= Treatment, color = Type)) + geom_boxplot()
+
+```
+Not separating by concentration and just looking at the distribution of uptake levels we see that plants from Quebec have a higher uptake rate than Mississippi.
+
+While that relationship remains when we consider the chilled versus non chilled plants, there is a much larger difference in uptake between Quebec and Mississippi when the plants were chilled overnight.
+
+```{r}
+CO2 %>% group_by(Treatment) %>% ggplot(aes(y=uptake, x= Treatment, color = Type)) + geom_boxplot() + facet_wrap(.~ conc)
+```
+
+Examining how the previous relationship changes based on the ambient concentration we see that at lower levels of ambient Caron Dioxide the difference in uptake rates is smaller. The difference grows larger as the levels of ambient CO2 increase. As far as chilled and non chilled differences go, it could be that plants in quebec are subjected to colder weather than Mississippi plants so their uptake might be less affected by being chilled overnight.
+
+# Dataset 3: `diamonds`
+
+The diamonds dataset consists of `r ncol(10)` variables of `r nrow(diamonds)`. These variables consist of price, carat, cut, color, clarity, depth, and dimensions of each diamond.
+How strong of a relationship is there between the carat(weight) of the diamond and it's price? Is that relationship dependent on cut or clarity? We visualize the data to get at these answers.
+
+```{r}
+data(diamonds)
+diamonds %>% filter(carat <= 3 & (cut=='Fair' | cut =='Ideal'))%>% ggplot(aes(x=carat, y=price, color = cut)) + geom_smooth() + ylab("Price in $")
+```
+
+
+We see that for very small carat diamonds the best and worst cuts are still relatively close in price. Once we look at 1-3 carat diamonds we see a gap in how much more expensive the highest quality cuts (Ideal) are compared to the lowest quality cuts (fair).
+
+
+
