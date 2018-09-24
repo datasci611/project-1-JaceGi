@@ -13,7 +13,7 @@ library(tidyverse,ggplot2)
 
 ```{r}
 chick<-tibble(weight = chickwts$weight, feed = chickwts$feed)
-chick %>% ggplot(aes(x=feed, y = weight, fill = feed)) + geom_boxplot() + geom_jitter(width=.1) + ylab("Chicks weight in grams")
+chick %>% ggplot(aes(x=feed, y = weight, fill = feed)) + geom_boxplot() + geom_jitter(width=.1) + ylab("Chicks weight in grams") + ggtitle("Which feed leads to heavier chicks?")
 
 chick %>% group_by(feed) %>% summarise(mean =mean(weight))
 chick %>% group_by(feed) %>% summarise(sd = sd(weight))
@@ -28,18 +28,19 @@ It would be interesting to repeat this experiment by offering a mix of the diffe
 In the `CO2` dataset we have different plants from two origins: Quebec and Mississippi and their recorded CO2 update rates at varying ambient carbon dioxide concentrations with two different treatments of chilled overnight and not chilled overnight.
 
 ```{r}
-CO2 %>% ggplot(aes(y=uptake, x= Type, color = Type)) + geom_boxplot()
+CO2 %>% ggplot(aes(y=uptake, x= Type, color = Type)) + geom_boxplot() + ylab("Update Rate") + xlab("Tree Origin") + ggtitle("Do Quebec plants have higher CO2 uptake?")
 
 
-CO2 %>% group_by(Treatment) %>% ggplot(aes(y=uptake, x= Treatment, color = Type)) + geom_boxplot()
+CO2 %>% group_by(Treatment) %>% ggplot(aes(y=uptake, x= Treatment, color = Type)) + geom_boxplot() + ylab("Update Rate") + xlab("Chill Status") + ggtitle("Which plants handle the chill better")
 
 ```
+
 Not separating by concentration and just looking at the distribution of uptake levels we see that plants from Quebec have a higher uptake rate than Mississippi.
 
 While that relationship remains when we consider the chilled versus non chilled plants, there is a much larger difference in uptake between Quebec and Mississippi when the plants were chilled overnight.
 
 ```{r}
-CO2 %>% group_by(Treatment) %>% ggplot(aes(y=uptake, x= Treatment, color = Type)) + geom_boxplot() + facet_wrap(.~ conc)
+CO2 %>% group_by(Treatment) %>% ggplot(aes(y=uptake, x= Treatment, color = Type)) + geom_boxplot() + facet_wrap(.~ conc) + ylab("Update Rate") + xlab("Chill Status") + ggtitle("Comparing how Quebec and Mississipp plants uptake rates vary with ambient \n CO2 levels")
 ```
 
 Examining how the previous relationship changes based on the ambient concentration we see that at lower levels of ambient Caron Dioxide the difference in uptake rates is smaller. The difference grows larger as the levels of ambient CO2 increase. As far as chilled and non chilled differences go, it could be that plants in quebec are subjected to colder weather than Mississippi plants so their uptake might be less affected by being chilled overnight.
@@ -47,15 +48,33 @@ Examining how the previous relationship changes based on the ambient concentrati
 # Dataset 3: `diamonds`
 
 The diamonds dataset consists of `r ncol(10)` variables of `r nrow(diamonds)`. These variables consist of price, carat, cut, color, clarity, depth, and dimensions of each diamond.
-How strong of a relationship is there between the carat(weight) of the diamond and it's price? Is that relationship dependent on cut or clarity? We visualize the data to get at these answers.
+How strong of a relationship is there between the carat(weight) of the diamond and it's price? Is that relationship dependent on cut? We visualize the data to get at these answers.
 
 ```{r}
 data(diamonds)
-diamonds %>% filter(carat <= 3 & (cut=='Fair' | cut =='Ideal'))%>% ggplot(aes(x=carat, y=price, color = cut)) + geom_smooth() + ylab("Price in $")
+diamonds %>% filter(carat <= 3 & (cut=='Fair' | cut =='Ideal'))%>% ggplot(aes(x=carat, y=price, color = cut)) + geom_smooth() + ylab("Price in $") +ggtitle("Is there a difference between Fair cut diamonds and \n Ideal cut diamonds?")
 ```
 
 
 We see that for very small carat diamonds the best and worst cuts are still relatively close in price. Once we look at 1-3 carat diamonds we see a gap in how much more expensive the highest quality cuts (Ideal) are compared to the lowest quality cuts (fair).
 
 
+```{r}
+diamonds %>% group_by(cut) %>% filter(carat==.3) %>% summarise(MeanPrice = mean(price),MedianPrice= median(price))
+```
 
+Even though there are visual differences between a fair cut and an Ideal cut, when we look at the average prices for these cuts and see that there is not much difference in price between Fair cut diamonds and Ideal cut diamonds. Maybe the mean is not a good summary of price so instead we look at median and find a more reasonable ordering of prices based on cut.
+
+#Dataset 4: `mtcars`
+
+There will inevitably be another "Fast and Furious" movie coming out. If the movie inspires you to become a street racer you might be interested in how the number of cylinders or horsepower of your car will affect your quarter mile time.
+
+```{r}
+mtcars<-as.tibble(mtcars)
+p<- mtcars %>% group_by(cyl) %>% ggplot() + geom_point(aes(x=hp, y= qsec, color=cyl)) + ylab("Quarter mile time in seconds") + xlab("Gross Horsepower")
+p <- p + guides(fill=guide_legend(title="# of Cylinders")) +ggtitle("Fast and Furious: Higher horsepower leads to faster times")
+p
+```
+
+
+The `mtcars` dataset is data taken from 1974 "Motor Trend" US Magazine. It contains information on fuel consumption as well as vehicle data such as the number of cylinders, horsepower, weight, and how fast the car drove the quarter mile. From this figure it seems we want to get the vehicle with the most horsepower that also has an 8 cylinder engine.
